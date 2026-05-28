@@ -1,0 +1,104 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Geist+Mono:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+
+@theme {
+  --color-ide-bg: var(--ide-bg);
+  --color-ide-text: var(--ide-text);
+  --color-ide-text-variant: var(--ide-text-variant);
+  --color-ide-primary: var(--ide-primary);
+  --color-ide-primary-btn: var(--ide-primary-btn);
+  --color-ide-secondary: var(--ide-secondary);
+  --color-ide-border: var(--ide-border);
+  --color-ide-surface: var(--ide-surface);
+  --color-ide-surface-lowest: var(--ide-surface-lowest);
+  --color-ide-surface-low: var(--ide-surface-low);
+  --color-ide-surface-high: var(--ide-surface-high);
+  --color-ide-surface-highest: var(--ide-surface-highest);
+  --color-ide-metric-accent: var(--ide-metric-accent);
+
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+}
+
+:root {
+  /* Light Theme Variables */
+  --ide-bg: #f9fafb;
+  --ide-text: #0f172a;
+  --ide-text-variant: #475569;
+  --ide-primary: #6d3bd7;
+  --ide-primary-btn: #8b5cf6;
+  --ide-secondary: #0284c7;
+  --ide-border: #e2e8f0;
+  --ide-surface: #ffffff;
+  --ide-surface-lowest: #ffffff;
+  --ide-surface-low: #f1f5f9;
+  --ide-surface-high: #f8fafc;
+  --ide-surface-highest: #e2e8f0;
+  --ide-metric-accent: #0284c7;
+}
+
+body {
+  background-color: var(--ide-bg);
+  color: var(--ide-text);
+  overflow-x: hidden;
+  transition-property: background-color, color, border-color;
+  transition-duration: 300ms;
+}
+
+.ide-border {
+  border: 1px solid var(--ide-border);
+}
+.ide-border-b {
+  border-bottom: 1px solid var(--ide-border);
+}
+.ide-border-r {
+  border-right: 1px solid var(--ide-border);
+}
+.ide-border-l {
+  border-left: 1px solid var(--ide-border);
+}
+.ide-border-t {
+  border-top: 1px solid var(--ide-border);
+}
+
+.metric-accent {
+  border-left: 2px solid var(--ide-metric-accent);
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: var(--ide-bg);
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--ide-border);
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}
+.terminal-blink::after {
+  content: "_";
+  animation: blink 1s step-end infinite;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ide-bg: #0f131d;
+    --ide-text: #dfe2f1;
+    --ide-text-variant: #cbc3d7;
+    --ide-primary: #d0bcff;
+    --ide-primary-btn: #8b5cf6;
+    --ide-secondary: #4cd7f6;
+    --ide-border: #1e293b;
+    --ide-surface: #0f131d;
+    --ide-surface-lowest: #0a0e18;
+    --ide-surface-low: #171b26;
+    --ide-surface-high: #1c1f2a;
+    --ide-surface-highest: #313540;
+    --ide-metric-accent: #4cd7f6;
+  }
+}

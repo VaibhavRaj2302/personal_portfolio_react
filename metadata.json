@@ -1,0 +1,6 @@
+{
+  "name": "IDE Core Portfolio",
+  "description": "An interactive developer workspace portfolio featuring project code inspectors, Git-style timelines, and custom visual preferences.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
