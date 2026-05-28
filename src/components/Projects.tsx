@@ -109,7 +109,7 @@ const projectsData: Project[] = [
     ],
     image:
       "https://lh3.googleusercontent.com/aida-public/AB6AXuAGRkaRFCpPUI1T_dXWSuoP87sDzFdfAgBhbZYAQpQ2QbNtAjHHcJDhZj1A9kPL71VPe7Fz2qza14zeOymj8cB2iWLgsGRjQpd9KmcOebQ3C-Xapp45q7VRgtlwj07H-tJOxZKzaoeDaSijVwevgx6lYTYl5g6uRoVBwS26qDx-RFNzWFNpLiApVOAeUWmMw1O7kKwIl246NPGUwQ1ztvLBA970PHzUsLqS1R1ugoIzHwGh7PvqfUv7s5TUem0j9uazKK1iQkQOfOc",
-    alt: "Medical data visualization on a tablet screen.",
+    alt: "Medical data visualization on a tablet screen",
     details: [
       "The initial project setup utilizes the MVVM architecture while strictly adhering to SOLID design principles for clean, maintainable code.",
       "Integrated third-party dependencies using Swift Package Manager (SPM) to ensure a streamlined project structure and a future-proof alternative to CocoaPods.",
