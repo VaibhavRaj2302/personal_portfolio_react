@@ -13,67 +13,45 @@ const projectsData: Project[] = [
     title: "Bud-e Nation",
     role: "LEAD_IOS",
     description:
-      "Leading the architectural implementation of next-gen mobile interactions on iOS platforms with Swift and Objective-c code interoperatibility",
-    tech: [
-      "SWIFT",
-      "UIKIT",
-      "CORE_DATA",
-      "OBJECTIVE-C",
-      "COCOA_PODS",
-      "COCOA_TOUCH",
-      "PODS",
-      "SINGLETON_PATTERN",
-      "FIREBASE_PUSH_NOTIFICATIONS",
-      "FIREBASE_CRASHLYTICS",
-      "MVVM",
-      "MVC",
-      "SOLID_ARCHITECTURE",
-      "REST_API",
+      "A native iOS app where I led the migration of legacy Objective-C modules to Swift without breaking existing functionality — while shipping new features in parallel. Built on a Core Data offline-first architecture so the app stays usable with zero connectivity.",
+    tech: ["SWIFT", "UIKIT", "CORE_DATA", "OBJECTIVE-C", "FIREBASE", "MVVM"],
+    image: "REPLACE_WITH_REAL_SCREENSHOT_1",
+    alt: "Bud-e Nation iOS app interface showing core user flow.",
+    status: "STATUS: DEPLOYED", // TODO: confirm — if this is wrong, fix it, don't leave it guessed
+    links: undefined,
+    metrics: [
+      "TODO: e.g. 'Cut crash rate by X% after Crashlytics-driven triage'",
+      "TODO: e.g. 'Reduced offline sync conflicts via idempotent background jobs'",
     ],
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuC341OtDdaZLxogHAcm14JT1k7UwxEsjnsEXQLUhH27oTWOK_d37eM36BQiiN5wdPX8o-TtYEHf5KzqtKUvkjlXtZJ7K0ankZTgQt9qyIoxMp1PFldtn6ht6RG7Kp8c0Scc9XuTbDrBmliotmcw86312QEViOfcZh8NmHNpRtGOWGre-SRFBG_tDh6SMKaH9LMEg73-jG_oLFJWQStyTRNCHXKXHR6A01UX8EkD12MRN4OGbaip41rh75OUnIEV6ffwG5COOJr8gVU",
-    alt: "A clean, high-contrast mobile interface design displayed on a sleek smartphone.",
     details: [
-      "Writting and implementing new Views, Models and their View Models in Swift",
-      "Handled the integation of New Swift code with old Objective-c code for better interoperability",
-      "Creating dynamic UI using UIKIT components for better UI/UX experience",
-      "Designed and refined modular Core Data relational schemas supporting lightning-fast offline cache mechanics.",
-      "Engineered multi-threaded background synchronization services with reliable idempotency keys.",
-      "Constructed fluid programmatic view constraints utilizing custom UIKit components and CoreAnimation layers.",
+      "Led interoperability between new Swift modules and legacy Objective-C code, avoiding a costly full rewrite.",
+      "Designed Core Data relational schemas for fast, reliable offline caching.",
+      "Built multi-threaded background sync with idempotency keys to prevent duplicate writes on flaky networks.",
+      "Used Firebase Crashlytics to identify and prioritize the highest-impact stability issues.",
+      "Built UI with programmatic constraints and custom UIKit components — no Storyboards, for easier code review and merge conflict resolution.",
     ],
   },
   {
     id: "jc-web",
     title: "JC-Web",
-    role: "LEAD_FRONTEND_FLUTTER",
-    description: `JC is a streamlined communication and workflow management platform
-      built specifically for garment/cloths manufacturing and stitching ecosystems. 
-      The app serves as a centralized hub connecting floor managers, senior administrators,
-      and third-party stitching vendors to eliminate production bottlenecks. It enables
-      users to instantly report fabric or machinery issues, escalate critical delays to 
-      admins, and broadcast vital design updates in real time using push notification. 
-      Additionally, JC features a dedicated portal for stitching partners, allowing for 
-      seamless job allocation, clear communication, and end-to-end production tracking 
-      from the factory floor to final delivery.`,
-    tech: [
-      "FLUTTER",
-      "DART",
-      "PWA",
-      "FIREBASE_PUSH_NOTIFICATION",
-      "REST_API",
-      "MVVM",
-      "BLoC",
-    ],
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuA0MYp9FBDmqJbkmuV4vCvhBcDOAC2YXF6dGqmpKuAEFzK3zRQ0H6dBmbL2j3oz6UAFClPFx3AUB40p1144wxQPJsmo2A7WCKxuwMb6j6zivTP5rm1Tsyfdn-7DZcQxZzud2YsOnWMwxHybTYB79cuXKLSOwrzSL2qksoy8eqR017T9zS2F2XF1cbYCeplSFAdz0p9TDEYb9Xc8Qi587NXXl9jdvDpzF7eJICER2f1kAiwrXxLJKj_LadYbr0DV5gAJj2lWPgcrAI",
-    alt: "Focused close-up of code on a monitor.",
+    role: "LEAD_FLUTTER",
+    description:
+      "A communication platform for garment manufacturing floors, built to replace informal WhatsApp/phone-call coordination between floor managers, admins, and third-party stitching vendors. Real-time issue escalation and job tracking replace what used to be lost in group chats and missed calls.",
+    tech: ["FLUTTER", "DART", "FIREBASE", "REST_API", "BLoC"],
+    image: "REPLACE_WITH_REAL_SCREENSHOT_2",
+    alt: "JC-Web dashboard showing factory floor issue tracking and job allocation.",
     status: "STATUS: DEPLOYED",
+    links: undefined,
+    metrics: [
+      "TODO: e.g. 'Reduced average issue-to-resolution time from X hours to Y'",
+      "TODO: e.g. 'Onboarded N stitching vendors onto the partner portal'",
+    ],
     details: [
-      "Engineered a fully responsive layout mapping canvas drawing contexts directly onto target browser viewports using Flutter.",
-      "Optimized paint intervals to retain consistent 60fps scrolling efficiency under heavy text/image layering.",
-      "Integrated Firebase push notifications for real time notifications for better communications between the users in the work environment.",
-      "Implemented Business logic component (BLoC) for flutter for better development cycle and easy integration of new features.",
-      "Fire base hosting for deploying web build so the webpages have maximum uptime without any problems faced on conventional methods and easy and fast build deployment for new features.",
+      "Built a responsive Flutter web app used across desktop and floor-tablet devices with one shared codebase.",
+      "Used BLoC to keep business logic testable and decoupled from UI, easing onboarding of new contributors.",
+      "Integrated Firebase push notifications so design changes and critical delays reach the right people instantly instead of getting buried in chat threads.",
+      "Deployed via Firebase Hosting for fast iteration — new features ship without a release-cycle bottleneck.",
+      "Optimized rendering to hold steady frame rates even with heavy image/text layering on lower-end factory-floor tablets.",
     ],
   },
   {
@@ -81,15 +59,17 @@ const projectsData: Project[] = [
     title: "iMedisave",
     role: "LEAD_FLUTTER",
     description:
-      "Healthcare management platform focused on variety, speed, and intuitive user workflows. Engineered to handle high-frequency data updates with zero lag and providing medical supplies to the one that needs the most.",
-    tech: ["FLUTTER", "DART", "REST_API"],
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAGRkaRFCpPUI1T_dXWSuoP87sDzFdfAgBhbZYAQpQ2QbNtAjHHcJDhZj1A9kPL71VPe7Fz2qza14zeOymj8cB2iWLgsGRjQpd9KmcOebQ3C-Xapp45q7VRgtlwj07H-tJOxZKzaoeDaSijVwevgx6lYTYl5g6uRoVBwS26qDx-RFNzWFNpLiApVOAeUWmMw1O7kKwIl246NPGUwQ1ztvLBA970PHzUsLqS1R1ugoIzHwGh7PvqfUv7s5TUem0j9uazKK1iQkQOfOc",
-    alt: "Medical data visualization on a tablet screen.",
+      "A healthcare logistics platform connecting medical supply requests with available inventory in real time. Built as a installable PWA so field staff get an app-like experience without needing app store distribution or updates.",
+    tech: ["FLUTTER", "DART", "REST_API", "PWA"],
+    image: "REPLACE_WITH_REAL_SCREENSHOT_3",
+    alt: "iMedisave interface showing real-time medical supply and inventory data.",
+    status: "TODO: confirm actual status",
+    links: undefined,
+    metrics: ["TODO: e.g. 'Reduced supply request response time from X to Y'"],
     details: [
-      "Created custom UI for mobile and desktop for ease of use, irrespective of user device.",
-      "Integrated RESTful API from Node JS back end service for providing real time data to the user.",
-      "Progressive web application (PWA) implementation so the user can use the web application as a App rather then as a web application.",
+      "Built a single responsive UI that works across mobile and desktop without device-specific branches.",
+      "Integrated with a Node.js backend over REST to keep supply/demand data current in real time.",
+      "Shipped as a PWA — installable on the home screen, works offline-first, no app store review cycle for updates.",
     ],
   },
   {
@@ -97,25 +77,20 @@ const projectsData: Project[] = [
     title: "Tee Up Alert",
     role: "LEAD_IOS",
     description:
-      "PGTA needed a straightforward iOS solution to make their large-scale warehouse asset and inventory management hassle-free. Our app stepped in to fill that gap, delivering intuitive features that made the daily workflow much easier for the team while significantly boosting overall business productivity.",
-    tech: [
-      "SWIFT",
-      "FIREBASE_PUSH_NOTIFICATION",
-      "REST_API",
-      "SWIFT_PACKAGE_MANAGER",
-      "MVVM",
-      "SINGLETON_PATTERN",
-      "GITHUB_ACTIONS",
+      "A warehouse asset and inventory management app built for PGTA to replace manual stock checks with real-time, location-aware notifications — cutting the daily back-and-forth between warehouse floor and office.",
+    tech: ["SWIFT", "FIREBASE", "REST_API", "SPM", "MVVM"],
+    image: "REPLACE_WITH_REAL_SCREENSHOT_4",
+    alt: "Tee Up Alert warehouse inventory app showing real-time stock alerts.",
+    status: "STATUS: DEPLOYED",
+    links: undefined,
+    metrics: [
+      "TODO: e.g. 'Reduced manual stock-check time by X% across N warehouses'",
     ],
-    image:
-      "https://lh3.googleusercontent.com/aida-public/AB6AXuAGRkaRFCpPUI1T_dXWSuoP87sDzFdfAgBhbZYAQpQ2QbNtAjHHcJDhZj1A9kPL71VPe7Fz2qza14zeOymj8cB2iWLgsGRjQpd9KmcOebQ3C-Xapp45q7VRgtlwj07H-tJOxZKzaoeDaSijVwevgx6lYTYl5g6uRoVBwS26qDx-RFNzWFNpLiApVOAeUWmMw1O7kKwIl246NPGUwQ1ztvLBA970PHzUsLqS1R1ugoIzHwGh7PvqfUv7s5TUem0j9uazKK1iQkQOfOc",
-    alt: "Medical data visualization on a tablet screen",
     details: [
-      "The initial project setup utilizes the MVVM architecture while strictly adhering to SOLID design principles for clean, maintainable code.",
-      "Integrated third-party dependencies using Swift Package Manager (SPM) to ensure a streamlined project structure and a future-proof alternative to CocoaPods.",
-      "Developed the application for PGTA to efficiently manage inventory, assets, and stock across their extensive warehouse network.",
-      "Implemented a warehouse-specific login system, allowing the app to trigger localized notifications based on real-time stock levels and incoming shipments.",
-      "Leveraged Push Notifications to deliver instant updates on stock and asset status, significantly reducing manual follow-ups and improving team coordination on the warehouse floor.",
+      "Architected with MVVM and SOLID principles from day one for a codebase that stayed maintainable as the team grew.",
+      "Migrated dependency management to Swift Package Manager, dropping CocoaPods for faster builds and simpler upgrades.",
+      "Built warehouse-specific login so notifications are scoped to the right location's stock and shipment events.",
+      "Used push notifications to replace manual phone/radio check-ins between warehouse staff and management.",
     ],
   },
 ];

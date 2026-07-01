@@ -13,6 +13,8 @@ export interface Project {
   image: string;
   alt: string;
   status?: string;
+  links?: LinkObject | undefined;
+  metrics?: String[] | undefined;
 }
 
 export interface Experience {
@@ -34,4 +36,11 @@ export interface ContactMessage {
   email: string;
   message: string;
   timestamp: string;
+}
+
+export interface LinkObject {
+  appStoreUrl: null; // TODO: add if public
+  repoUrl: null; // TODO: add if shareable, else leave null
+  caseStudyUrl: null;
+  private: true; // set false once you decide what's shareable
 }
