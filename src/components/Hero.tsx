@@ -13,6 +13,39 @@ interface HeroProps {
 const metricsList: Metric[] = [{ value: "3+", label: "Years Experience" }];
 
 export default function Hero({ onScrollTo }: HeroProps) {
+  const handleDownload = async (): Promise<void> => {
+    // Replace with your actual file URL or API endpoint
+    const fileUrl = "./public/Vaibhav_flutter_resume.pdf";
+    const fileName = "Vaibhav_Raj_Resume.pdf";
+
+    try {
+      const response = await fetch(fileUrl);
+      if (!response.ok) throw new Error("Network response was not ok");
+
+      // Convert the response data into a Blob
+      const blob = await response.blob();
+
+      // Create a temporary local URL for the blob object
+      const url = window.URL.createObjectURL(blob);
+
+      // Create a temporary anchor element programmatically
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = fileName;
+
+      // Append to the DOM, trigger click, and remove it
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      // Clean up the memory allocated for the URL object
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error("Error downloading the file:", error);
+      alert("Failed to download resume. Please try again.");
+    }
+  };
+
   return (
     <section
       className="flex-grow p-6 md:p-12 transition-colors duration-300"
@@ -73,7 +106,9 @@ export default function Hero({ onScrollTo }: HeroProps) {
           </button>
 
           <button
-            onClick={() => {}}
+            onClick={() => {
+              handleDownload();
+            }}
             className="border border-ide-border bg-transparent text-ide-text font-mono text-[12px] font-bold tracking-wider px-8 py-4 rounded-none hover:bg-ide-surface-low hover:border-ide-text transition-all duration-300"
             id="btn-view-repository"
           >
