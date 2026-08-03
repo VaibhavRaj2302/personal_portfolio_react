@@ -9,7 +9,11 @@
       "request": "launch",
       "name": "Debug React App",
       "url": "http://localhost:5173",
-      "webRoot": "${workspaceFolder}/src",
+      "webRoot": "${workspaceFolder}",
+      "sourceMapPathOverrides": {
+        "vite:///*": "${workspaceFolder}/*",
+        "webpack:///./*": "${workspaceFolder}/*"
+      },
       "preLaunchTask": "start react start"
     }
   ]
