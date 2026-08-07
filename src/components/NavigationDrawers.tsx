@@ -13,6 +13,7 @@ const buttonsList = [
   { buttonName: "SUMMARY", buttonId: "summary" },
   { buttonName: "PROJECTS", buttonId: "projects" },
   { buttonName: "EXPERIENCE", buttonId: "experience" },
+  { buttonName: "ACHIEVEMENTS", buttonId: "achievements" },
   { buttonName: "SKILLS", buttonId: "skills" },
   { buttonName: "EDUCATION", buttonId: "education" },
   { buttonName: "CONTACT", buttonId: "contact" },

@@ -20,6 +20,7 @@ export default function Header({
     { id: "summary", label: "SUMMARY" },
     { id: "projects", label: "PROJECTS" },
     { id: "experience", label: "EXPERIENCE" },
+    { id: "achievements", label: "ACHIEVEMENTS" },
     { id: "skills", label: "SKILLS" },
     { id: "education", label: "EDUCATION" },
     { id: "contact", label: "CONTACT" },

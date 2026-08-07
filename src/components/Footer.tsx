@@ -42,29 +42,6 @@ export default function Footer() {
           </a>
         </div>
 
-        <div className="font-sans text-sm text-ide-text-variant text-center flex flex-col sm:flex-row items-center gap-2 justify-center">
-          <span>
-            Certifications:{" "}
-            <a
-              href="https://verify.skilljar.com/c/aq37xxnotht9"
-              className="text-ide-primary hover:underline"
-              target="_blank"
-              rel="noreferrer"
-            >
-              Claude Code in Action
-            </a>{" "}
-            •{" "}
-            <a
-              href="https://verify.skilljar.com/c/2gz9fnviar3y"
-              className="text-ide-primary hover:underline"
-              target="_blank"
-              rel="noreferrer"
-            >
-              AI Fluency: Framework & Foundations
-            </a>
-          </span>
-        </div>
-
         <button
           onClick={scrollToTop}
           className="font-mono text-[11px] text-ide-text-variant hover:text-ide-primary border border-ide-border hover:border-ide-primary px-3 py-1.5 flex items-center gap-1.5 transition-all group"

@@ -11,6 +11,7 @@ import Summary from "./components/Summary";
 import Projects from "./components/Projects";
 import ExperienceTimeline from "./components/Experience";
 import Skills from "./components/Skills";
+import Achievements from "./components/Achievements";
 
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
@@ -54,6 +55,7 @@ export default function App() {
             <Summary />
             <Projects />
             <ExperienceTimeline />
+            <Achievements />
             <Skills />
             <Education />
             <Contact />
