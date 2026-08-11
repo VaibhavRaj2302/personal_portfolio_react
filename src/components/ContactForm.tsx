@@ -1,9 +1,12 @@
 import { useState, ChangeEvent, FormEvent } from "react";
+import { saveUserQuery } from "../services/QueryServices";
+import GenericModal, { ModalAction } from "./GenericModel";
 
 interface ContactFormInterface {
   name: string;
   email: string;
   message: string;
+  number?: string;
 }
 
 function ContactForm() {
@@ -13,11 +16,93 @@ function ContactForm() {
     message: "",
   });
 
+  const [isModalOpen, setIsModalOpen] = useState<{
+    show: boolean;
+    modelAction: ModalAction[] | undefined;
+    title?: string | null;
+    content?: React.ReactNode | string | null;
+  }>({
+    show: false,
+
+    modelAction: [
+      {
+        label: "Ok",
+        type: "primary",
+        onClick: () => {
+          okAction();
+        },
+      },
+    ],
+  });
+
+  const [submitting, setSubmitting] = useState(false);
+
+  function okAction() {
+    setFormField({ email: "", message: "", name: "" });
+    setIsModalOpen({
+      show: false,
+      modelAction: undefined,
+      content: null,
+      title: null,
+    });
+  }
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    // handle form submission
-    // TODO: implement firebase real time database
-    // and store in query section of the database
+
+    // Show loader.
+    setSubmitting(true);
+
+    setTimeout(async () => {
+      try {
+        const { message } = await saveUserQuery({ queryData: form });
+
+        setIsModalOpen({
+          show: true,
+          content: message,
+          title: "Sumbitted Successfully.",
+          modelAction: [
+            {
+              label: "Ok",
+              type: "primary",
+              onClick: () => {
+                okAction();
+              },
+            },
+          ],
+        });
+      } catch (error) {
+        console.log(error);
+
+        setIsModalOpen({
+          show: true,
+          content: `${error}`,
+          title: "Something went wrong!",
+          modelAction: [
+            {
+              label: "Retry",
+              type: "secondary",
+              onClick: () => {
+                // TODO: implement retry.
+              },
+            },
+            {
+              label: "Ok",
+              type: "danger",
+              onClick: () => {
+                setIsModalOpen({
+                  show: false,
+                  modelAction: undefined,
+                  content: null,
+                });
+              },
+            },
+          ],
+        });
+      } finally {
+        setSubmitting(false);
+      }
+    }, 2000);
   }
 
   function handleChange(
@@ -68,6 +153,22 @@ function ContactForm() {
 
         <div>
           <label className="block font-mono text-[11px] text-ide-text-variant mb-2 font-bold tracking-wider">
+            MOBILE_NUMBER
+          </label>
+          <input
+            type="tel"
+            name="number"
+            value={form.number}
+            onChange={handleChange}
+            className="w-full bg-ide-bg border border-ide-border px-4 py-3 text-ide-text focus:border-ide-primary focus:ring-0 rounded-none transition-colors font-sans text-sm focus:outline-none"
+            placeholder="+91 9876543210"
+            required
+            id="form-sender-phone"
+          />
+        </div>
+
+        <div>
+          <label className="block font-mono text-[11px] text-ide-text-variant mb-2 font-bold tracking-wider">
             MESSAGE_BODY
           </label>
           <textarea
@@ -86,10 +187,20 @@ function ContactForm() {
           type="submit"
           className="w-full bg-[#8B5CF6] text-white font-mono text-[12px] font-bold py-4 hover:bg-[#7c3aed] hover:text-white transition-all duration-300 tracking-wider rounded-none"
           id="btn-execute-send"
+          disabled={submitting}
         >
-          EXECUTE_SEND
+          {submitting ? <span className="loader"></span> : "EXECUTE_SEND"}
         </button>
       </form>
+      <GenericModal
+        isOpen={isModalOpen.show}
+        onClose={() => {
+          okAction();
+        }}
+        title={isModalOpen.title ?? "Alert"}
+        content={isModalOpen.content}
+        actions={isModalOpen.modelAction}
+      />
     </div>
   );
 }
