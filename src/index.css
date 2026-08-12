@@ -21,20 +21,19 @@
 }
 
 :root {
-  /* Light Theme Variables */
-  --ide-bg: #f9fafb;
+  --ide-bg: #f7f8fb;
   --ide-text: #0f172a;
   --ide-text-variant: #475569;
-  --ide-primary: #6d3bd7;
-  --ide-primary-btn: #8b5cf6;
-  --ide-secondary: #0284c7;
+  --ide-primary: #2563eb;
+  --ide-primary-btn: #1d4ed8;
+  --ide-secondary: #0f766e;
   --ide-border: #e2e8f0;
   --ide-surface: #ffffff;
   --ide-surface-lowest: #ffffff;
-  --ide-surface-low: #f1f5f9;
-  --ide-surface-high: #f8fafc;
+  --ide-surface-low: #f8fafc;
+  --ide-surface-high: #f1f5f9;
   --ide-surface-highest: #e2e8f0;
-  --ide-metric-accent: #0284c7;
+  --ide-metric-accent: #2563eb;
 }
 
 body {
@@ -75,30 +74,35 @@ body {
   background: var(--ide-border);
 }
 
-@keyframes blink {
-  50% {
-    opacity: 0;
-  }
-}
-.terminal-blink::after {
-  content: "_";
-  animation: blink 1s step-end infinite;
-}
-
 @media (prefers-color-scheme: dark) {
   :root {
     --ide-bg: #0f131d;
     --ide-text: #dfe2f1;
     --ide-text-variant: #cbc3d7;
-    --ide-primary: #d0bcff;
-    --ide-primary-btn: #8b5cf6;
-    --ide-secondary: #4cd7f6;
+    --ide-primary: #60a5fa;
+    --ide-primary-btn: #2563eb;
+    --ide-secondary: #2dd4bf;
     --ide-border: #1e293b;
     --ide-surface: #0f131d;
     --ide-surface-lowest: #0a0e18;
     --ide-surface-low: #171b26;
     --ide-surface-high: #1c1f2a;
     --ide-surface-highest: #313540;
-    --ide-metric-accent: #4cd7f6;
+    --ide-metric-accent: #60a5fa;
+  }
+}
+.loader {
+  display: inline-block;
+  clip-path: inset(0 3ch 0 0);
+  animation: l4 1s steps(4) infinite;
+}
+
+.loader::before {
+  content: "Submitting...";
+}
+
+@keyframes l4 {
+  to {
+    clip-path: inset(0 -1ch 0 0);
   }
 }

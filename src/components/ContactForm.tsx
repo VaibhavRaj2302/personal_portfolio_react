@@ -1,0 +1,295 @@
+import { useState, ChangeEvent, FormEvent } from "react";
+import { saveUserQuery } from "../services/QueryServices";
+import GenericModal, { ModalAction } from "./GenericModel";
+
+interface ContactFormInterface {
+  name: string;
+  email: string;
+  message: string;
+  number?: string;
+}
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  number?: string;
+  message?: string;
+}
+
+function ContactForm() {
+  const [form, setFormField] = useState<ContactFormInterface>({
+    name: "",
+    email: "",
+    message: "",
+    number: "",
+  });
+
+  const [errors, setErrors] = useState<FormErrors>({});
+
+  const [isModalOpen, setIsModalOpen] = useState<{
+    show: boolean;
+    modelAction: ModalAction[] | undefined;
+    title?: string | null;
+    content?: React.ReactNode | string | null;
+  }>({
+    show: false,
+
+    modelAction: [
+      {
+        label: "Ok",
+        type: "primary",
+        onClick: () => {
+          okAction();
+        },
+      },
+    ],
+  });
+
+  const [submitting, setSubmitting] = useState(false);
+
+  function okAction() {
+    setFormField({ email: "", message: "", name: "", number: "" });
+    setErrors({});
+    setIsModalOpen({
+      show: false,
+      modelAction: undefined,
+      content: null,
+      title: null,
+    });
+  }
+
+  function validateForm(): boolean {
+    const newErrors: FormErrors = {};
+
+    // 1. SENDER_NAME validation (minimum 2 characters)
+    if (!form.name.trim() || form.name.trim().length < 2) {
+      newErrors.name = "Please enter a valid name (at least 2 characters).";
+    }
+
+    // 2. EMAIL_ADDRESS validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(form.email.trim())) {
+      newErrors.email = "Please enter a valid email address.";
+    }
+
+    // 3. MOBILE_NUMBER validation (Optional: validates format only if user entered something)
+    if (form.number && form.number.trim() !== "") {
+      const rawDigits = form.number.replace(/[\s\-\(\)\+]/g, "");
+      if (!/^\d{10,15}$/.test(rawDigits)) {
+        newErrors.number = "Please enter a valid phone number (10-15 digits).";
+      }
+    }
+
+    // 4. MESSAGE_BODY validation (minimum 10 characters)
+    if (!form.message.trim() || form.message.trim().length < 10) {
+      newErrors.message = "Message must be at least 10 characters long.";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  }
+
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+
+    // Prevent submission if validation fails
+    if (!validateForm()) return;
+
+    // Show loader.
+    setSubmitting(true);
+
+    setTimeout(async () => {
+      try {
+        const { message } = await saveUserQuery({ queryData: form });
+
+        setIsModalOpen({
+          show: true,
+          content: message,
+          title: "Sumbitted Successfully.",
+          modelAction: [
+            {
+              label: "Ok",
+              type: "primary",
+              onClick: () => {
+                okAction();
+              },
+            },
+          ],
+        });
+      } catch (error) {
+        console.log(error);
+
+        setIsModalOpen({
+          show: true,
+          content: `${error}`,
+          title: "Something went wrong!",
+          modelAction: [
+            {
+              label: "Retry",
+              type: "secondary",
+              onClick: () => {
+                // TODO: implement retry.
+              },
+            },
+            {
+              label: "Ok",
+              type: "danger",
+              onClick: () => {
+                setIsModalOpen({
+                  show: false,
+                  modelAction: undefined,
+                  content: null,
+                });
+              },
+            },
+          ],
+        });
+      } finally {
+        setSubmitting(false);
+      }
+    }, 2000);
+  }
+
+  function handleChange(
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) {
+    const { name, value } = event.target;
+    setFormField((prev) => ({ ...prev, [name]: value }));
+
+    // Clear error for the current field as user types
+    if (errors[name as keyof FormErrors]) {
+      setErrors((prev) => ({ ...prev, [name]: undefined }));
+    }
+  }
+
+  return (
+    <div className="align-middle justify-center flex m-10">
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-6 text-left w-100 p-10 ide-border transition-colors"
+        id="contact-form"
+        noValidate
+      >
+        <div>
+          <label className="block font-mono text-[11px] text-ide-text-variant mb-2 font-bold tracking-wider">
+            SENDER_NAME
+          </label>
+          <input
+            type="text"
+            name="name"
+            value={form.name}
+            onChange={handleChange}
+            className={`w-full bg-ide-bg border px-4 py-3 text-ide-text focus:ring-0 rounded-none transition-colors font-sans text-sm focus:outline-none ${
+              errors.name
+                ? "border-red-500 focus:border-red-500"
+                : "border-ide-border focus:border-ide-primary"
+            }`}
+            placeholder="John Doe"
+            required
+            id="form-sender-name"
+          />
+          {errors.name && (
+            <p className="mt-2 text-xs font-mono text-red-500 tracking-wide">
+              {errors.name}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block font-mono text-[11px] text-ide-text-variant mb-2 font-bold tracking-wider">
+            EMAIL_ADDRESS
+          </label>
+          <input
+            type="email"
+            name="email"
+            value={form.email}
+            onChange={handleChange}
+            className={`w-full bg-ide-bg border px-4 py-3 text-ide-text focus:ring-0 rounded-none transition-colors font-sans text-sm focus:outline-none ${
+              errors.email
+                ? "border-red-500 focus:border-red-500"
+                : "border-ide-border focus:border-ide-primary"
+            }`}
+            placeholder="john@example.com"
+            required
+            id="form-sender-email"
+          />
+          {errors.email && (
+            <p className="mt-2 text-xs font-mono text-red-500 tracking-wide">
+              {errors.email}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block font-mono text-[11px] text-ide-text-variant mb-2 font-bold tracking-wider">
+            MOBILE_NUMBER{" "}
+            <span className="text-gray-400 font-normal">(OPTIONAL)</span>
+          </label>
+          <input
+            type="tel"
+            name="number"
+            value={form.number || ""}
+            onChange={handleChange}
+            className={`w-full bg-ide-bg border px-4 py-3 text-ide-text focus:ring-0 rounded-none transition-colors font-sans text-sm focus:outline-none ${
+              errors.number
+                ? "border-red-500 focus:border-red-500"
+                : "border-ide-border focus:border-ide-primary"
+            }`}
+            placeholder="+91 9876543210"
+            id="form-sender-phone"
+          />
+          {errors.number && (
+            <p className="mt-2 text-xs font-mono text-red-500 tracking-wide">
+              {errors.number}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block font-mono text-[11px] text-ide-text-variant mb-2 font-bold tracking-wider">
+            MESSAGE_BODY
+          </label>
+          <textarea
+            name="message"
+            value={form.message}
+            onChange={handleChange}
+            className={`w-full bg-ide-bg border px-4 py-3 text-ide-text focus:ring-0 rounded-none transition-colors font-sans text-sm pb-10 focus:outline-none ${
+              errors.message
+                ? "border-red-500 focus:border-red-500"
+                : "border-ide-border focus:border-ide-primary"
+            }`}
+            placeholder="Hello, I have a project..."
+            rows={4}
+            required
+            id="form-message-body"
+          />
+          {errors.message && (
+            <p className="mt-2 text-xs font-mono text-red-500 tracking-wide">
+              {errors.message}
+            </p>
+          )}
+        </div>
+
+        <button
+          type="submit"
+          className="w-full bg-[#8B5CF6] text-white font-mono text-[12px] font-bold py-4 hover:bg-[#7c3aed] hover:text-white transition-all duration-300 tracking-wider rounded-none disabled:opacity-50"
+          id="btn-execute-send"
+          disabled={submitting}
+        >
+          {submitting ? <span className="loader"></span> : "EXECUTE_SEND"}
+        </button>
+      </form>
+      <GenericModal
+        isOpen={isModalOpen.show}
+        onClose={() => {
+          okAction();
+        }}
+        title={isModalOpen.title ?? "Alert"}
+        content={isModalOpen.content}
+        actions={isModalOpen.modelAction}
+      />
+    </div>
+  );
+}
+
+export default ContactForm;
