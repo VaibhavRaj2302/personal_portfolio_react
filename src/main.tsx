@@ -1,5 +1,4 @@
 import { StrictMode } from "react";
-// @ts-ignore
 import { createRoot } from "react-dom/client";
 import App from "./App.tsx";
 // Ignore missing type declarations for side-effect CSS import

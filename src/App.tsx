@@ -11,11 +11,13 @@ import Summary from "./components/Summary";
 import Projects from "./components/Projects";
 import ExperienceTimeline from "./components/Experience";
 import Skills from "./components/Skills";
+import Achievements from "./components/Achievements";
 
 import Contact from "./components/Contact";
 import Footer from "./components/Footer";
 import useDeviceType from "./utils/hooks/deviceUtility";
 import Education from "./components/Education";
+import ContactForm from "./components/ContactForm";
 
 export default function App() {
   const [sideBarOpen, setSideBarOpen] = useState<boolean>(false);
@@ -43,20 +45,25 @@ export default function App() {
         openDrawer={(open) => setSideBarOpen(open)}
       />
 
-      <main className="mt-[64px] max-w-7xl w-full mx-auto ide-border-l ide-border-r flex flex-row flex-grow min-h-[calc(100vh-64px)] transition-colors duration-300 relative">
+      <main className="mt-16 max-w-7xl w-full mx-auto ide-border-l ide-border-r ide-border-b  flex flex-row grow min-h-[calc(100vh-64px)] transition-colors duration-300 relative">
         {sideBarOpen && (
-          <NavigationDrawers handleClose={() => setSideBarOpen(false)} />
+          <NavigationDrawers
+            handleClose={() => setSideBarOpen(false)}
+            isOpen={sideBarOpen}
+          />
         )}
 
-        <div className="flex-grow flex flex-col overflow-x-hidden">
-          <div className="flex-grow flex flex-col">
+        <div className="grow flex flex-col overflow-x-hidden">
+          <div className="grow flex flex-col">
             <Hero onScrollTo={handleScrollTo} />
             <Summary />
             <Projects />
             <ExperienceTimeline />
+            <Achievements />
             <Skills />
             <Education />
             <Contact />
+            <ContactForm />
           </div>
         </div>
       </main>
