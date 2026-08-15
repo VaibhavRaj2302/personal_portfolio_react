@@ -1,9 +1,12 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import { saveUserQuery } from "../services/QueryServices";
 import GenericModal, { ModalAction } from "./GenericModel";
+import { send } from "@emailjs/browser";
+import DOMPurify from "dompurify";
 
 interface ContactFormInterface {
   name: string;
+  title: string;
   email: string;
   message: string;
   number?: string;
@@ -11,6 +14,7 @@ interface ContactFormInterface {
 
 interface FormErrors {
   name?: string;
+  title?: string;
   email?: string;
   number?: string;
   message?: string;
@@ -19,6 +23,7 @@ interface FormErrors {
 function ContactForm() {
   const [form, setFormField] = useState<ContactFormInterface>({
     name: "",
+    title: "",
     email: "",
     message: "",
     number: "",
@@ -48,7 +53,7 @@ function ContactForm() {
   const [submitting, setSubmitting] = useState(false);
 
   function okAction() {
-    setFormField({ email: "", message: "", name: "", number: "" });
+    setFormField({ email: "", message: "", name: "", number: "", title: "" });
     setErrors({});
     setIsModalOpen({
       show: false,
@@ -72,6 +77,11 @@ function ContactForm() {
       newErrors.email = "Please enter a valid email address.";
     }
 
+    // 3. TITLE validation (minimum 10 characters)
+    if (!form.title.trim() || form.title.trim().length < 10) {
+      newErrors.title = "Please enter a valid title (at least 10 characters).";
+    }
+
     // 3. MOBILE_NUMBER validation (Optional: validates format only if user entered something)
     if (form.number && form.number.trim() !== "") {
       const rawDigits = form.number.replace(/[\s\-\(\)\+]/g, "");
@@ -89,6 +99,28 @@ function ContactForm() {
     return Object.keys(newErrors).length === 0;
   }
 
+  async function sendConfirmationEmailToSender(
+    sanitizedForm: ContactFormInterface,
+  ) {
+    // 2. Send Auto-Reply Email
+    await send(
+      import.meta.env.VITE_SERVICE_ID_EMAIL_JS,
+      import.meta.env.VITE_TEMPLATE_ID_EMAIL_JS,
+      {
+        name: sanitizedForm.name,
+        title: sanitizedForm.title,
+        email: sanitizedForm.email,
+        from: "Vaibhav raj singh",
+      },
+      import.meta.env.VITE_PUBLIC_KEY_EMAIL_JS,
+    );
+  }
+
+  // Helper to strip HTML tags and sanitize strings
+  const sanitizeInput = (str: string): string => {
+    return DOMPurify.sanitize(str.trim(), { ALLOWED_TAGS: [] }); // ALLOWED_TAGS: [] strips ALL HTML
+  };
+
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
 
@@ -98,56 +130,70 @@ function ContactForm() {
     // Show loader.
     setSubmitting(true);
 
-    setTimeout(async () => {
-      try {
-        const { message } = await saveUserQuery({ queryData: form });
+    await storeUserQueriesAndSendConfirmationEmail();
+  }
 
-        setIsModalOpen({
-          show: true,
-          content: message,
-          title: "Sumbitted Successfully.",
-          modelAction: [
-            {
-              label: "Ok",
-              type: "primary",
-              onClick: () => {
-                okAction();
-              },
-            },
-          ],
-        });
-      } catch (error) {
-        console.log(error);
+  async function storeUserQueriesAndSendConfirmationEmail() {
+    // Clean form payload before processing
+    const sanitizedForm: ContactFormInterface = {
+      name: sanitizeInput(form.name),
+      title: sanitizeInput(form.title),
+      email: form.email.trim(), // Email regex already validates structure
+      message: sanitizeInput(form.message),
+      number: form.number ? sanitizeInput(form.number) : "",
+    };
 
-        setIsModalOpen({
-          show: true,
-          content: `${error}`,
-          title: "Something went wrong!",
-          modelAction: [
-            {
-              label: "Retry",
-              type: "secondary",
-              onClick: () => {
-                // TODO: implement retry.
-              },
+    try {
+      const { message } = await saveUserQuery({ queryData: sanitizedForm });
+
+      // send confirmation email.
+      await sendConfirmationEmailToSender(sanitizedForm);
+
+      setIsModalOpen({
+        show: true,
+        content: message,
+        title: "Sumbitted Successfully.",
+        modelAction: [
+          {
+            label: "Ok",
+            type: "primary",
+            onClick: () => {
+              okAction();
             },
-            {
-              label: "Ok",
-              type: "danger",
-              onClick: () => {
-                setIsModalOpen({
-                  show: false,
-                  modelAction: undefined,
-                  content: null,
-                });
-              },
+          },
+        ],
+      });
+    } catch (error) {
+      console.log(error);
+
+      setIsModalOpen({
+        show: true,
+        content: `${error}`,
+        title: "Something went wrong!",
+        modelAction: [
+          {
+            label: "Retry",
+            type: "secondary",
+            onClick: async () => {
+              await storeUserQueriesAndSendConfirmationEmail();
             },
-          ],
-        });
-      } finally {
-        setSubmitting(false);
-      }
-    }, 2000);
+          },
+          {
+            label: "Ok",
+            type: "danger",
+            onClick: () => {
+              setIsModalOpen({
+                show: false,
+                modelAction: undefined,
+                content: null,
+              });
+            },
+          },
+        ],
+      });
+    } finally {
+      setSubmitting(false);
+    }
   }
 
   function handleChange(
@@ -216,6 +262,31 @@ function ContactForm() {
           {errors.email && (
             <p className="mt-2 text-xs font-mono text-red-500 tracking-wide">
               {errors.email}
+            </p>
+          )}
+        </div>
+
+        <div>
+          <label className="block font-mono text-[11px] text-ide-text-variant mb-2 font-bold tracking-wider">
+            TITLE
+          </label>
+          <input
+            type="text"
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            className={`w-full bg-ide-bg border px-4 py-3 text-ide-text focus:ring-0 rounded-none transition-colors font-sans text-sm focus:outline-none ${
+              errors.title
+                ? "border-red-500 focus:border-red-500"
+                : "border-ide-border focus:border-ide-primary"
+            }`}
+            placeholder="Reason to contact"
+            required
+            id="form-sender-name"
+          />
+          {errors.title && (
+            <p className="mt-2 text-xs font-mono text-red-500 tracking-wide">
+              {errors.title}
             </p>
           )}
         </div>
