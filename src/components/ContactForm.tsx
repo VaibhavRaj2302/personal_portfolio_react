@@ -2,6 +2,7 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import { saveUserQuery } from "../services/QueryServices";
 import GenericModal, { ModalAction } from "./GenericModel";
 import { send } from "@emailjs/browser";
+import DOMPurify from "dompurify";
 
 interface ContactFormInterface {
   name: string;
@@ -98,20 +99,27 @@ function ContactForm() {
     return Object.keys(newErrors).length === 0;
   }
 
-  async function sendConfirmationEmailToSender() {
+  async function sendConfirmationEmailToSender(
+    sanitizedForm: ContactFormInterface,
+  ) {
     // 2. Send Auto-Reply Email
     await send(
-      import.meta.env.SERVICE_ID_EMAIL_JS,
-      import.meta.env.TEMPLATE_ID_EMAIL_JS,
+      import.meta.env.VITE_SERVICE_ID_EMAIL_JS,
+      import.meta.env.VITE_TEMPLATE_ID_EMAIL_JS,
       {
-        name: form.name,
-        title: form.title,
-        email: form.email,
+        name: sanitizedForm.name,
+        title: sanitizedForm.title,
+        email: sanitizedForm.email,
         from: "Vaibhav raj singh",
       },
-      import.meta.env.PUBLIC_KEY_EMAIL_JS,
+      import.meta.env.VITE_PUBLIC_KEY_EMAIL_JS,
     );
   }
+
+  // Helper to strip HTML tags and sanitize strings
+  const sanitizeInput = (str: string): string => {
+    return DOMPurify.sanitize(str.trim(), { ALLOWED_TAGS: [] }); // ALLOWED_TAGS: [] strips ALL HTML
+  };
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -122,11 +130,24 @@ function ContactForm() {
     // Show loader.
     setSubmitting(true);
 
+    await storeUserQueriesAndSendConfirmationEmail();
+  }
+
+  async function storeUserQueriesAndSendConfirmationEmail() {
+    // Clean form payload before processing
+    const sanitizedForm: ContactFormInterface = {
+      name: sanitizeInput(form.name),
+      title: sanitizeInput(form.title),
+      email: form.email.trim(), // Email regex already validates structure
+      message: sanitizeInput(form.message),
+      number: form.number ? sanitizeInput(form.number) : "",
+    };
+
     try {
-      const { message } = await saveUserQuery({ queryData: form });
+      const { message } = await saveUserQuery({ queryData: sanitizedForm });
 
       // send confirmation email.
-      await sendConfirmationEmailToSender();
+      await sendConfirmationEmailToSender(sanitizedForm);
 
       setIsModalOpen({
         show: true,
@@ -153,8 +174,8 @@ function ContactForm() {
           {
             label: "Retry",
             type: "secondary",
-            onClick: () => {
-              // TODO: implement retry.
+            onClick: async () => {
+              await storeUserQueriesAndSendConfirmationEmail();
             },
           },
           {

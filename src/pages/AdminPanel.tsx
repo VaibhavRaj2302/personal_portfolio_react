@@ -4,67 +4,116 @@
  */
 
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { Lock, LogOut, ShieldCheck, ArrowLeft } from "lucide-react";
+import { ArrowLeft, Backpack, Home, LogOut, ShieldCheck } from "lucide-react";
 import useAuthStore from "../store/authStore";
-import { getAllQueries, type QueryEntry } from "../services/QueryServices";
-import { log } from "console";
+import { subscribeToQueries } from "../services/QueryServices";
+import { Queries } from "../models/QueryModel";
+import { DataSnapshot, Unsubscribe } from "firebase/database";
+import { useNavigate } from "react-router-dom";
+
+const formatTimestamp = (value?: Queries["createdAt"]) => {
+  if (!value) {
+    return "No timestamp provided";
+  }
+
+  if (typeof value === "number") {
+    return new Date(value).toLocaleString();
+  }
+
+  if (typeof value === "string") {
+    const parsedDate = new Date(value);
+    if (!Number.isNaN(parsedDate.getTime())) {
+      return parsedDate.toLocaleString();
+    }
+
+    return value;
+  }
+
+  if (typeof value === "object" && "seconds" in value && value.seconds) {
+    return new Date(value.seconds * 1000).toLocaleString();
+  }
+
+  return "Unknown timestamp";
+};
+
+const normalizeQueries = (value: Record<string, unknown> | null): Queries[] => {
+  if (!value || typeof value !== "object") {
+    return [];
+  }
+
+  return Object.entries(value).map(([id, item]) => {
+    const query =
+      item && typeof item === "object" ? (item as Record<string, unknown>) : {};
+
+    return {
+      id,
+      ...(query as Record<string, unknown>),
+      name: typeof query["name"] === "string" ? query["name"] : "Anonymous",
+      email:
+        typeof query["email"] === "string"
+          ? query["email"]
+          : "No email provided",
+      message:
+        typeof query["message"] === "string"
+          ? query["message"]
+          : "No message provided",
+      createdAt: query["createdAt"],
+    } as Queries;
+  });
+};
 
 export default function AdminPanelPage() {
-  const { user, isAuthorized, isLoading, login, logout } = useAuthStore();
-  const navigate = useNavigate();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const { user, isAuthorized, isLoading, logout } = useAuthStore();
+
   const [formError, setFormError] = useState("");
-  const [queries, setQueries] = useState<QueryEntry[]>([]);
+  const [queries, setQueries] = useState<Queries[]>([]);
   const [loadingQueries, setLoadingQueries] = useState(false);
-  const [submitting, setSubmitting] = useState(false);
+  const [selectedQuery, setSelectedQuery] = useState<Queries | null>(null);
 
-  const fetchQueries = async () => {
-    setLoadingQueries(true);
-
-    try {
-      const allQueries = await getAllQueries();
-      setQueries(allQueries);
-    } catch (error) {
-      setFormError(
-        error instanceof Error ? error.message : "Failed to load queries.",
-      );
-    } finally {
-      setLoadingQueries(false);
-    }
-  };
+  const navigate = useNavigate();
 
   useEffect(() => {
+    let unsubscribe: Unsubscribe | undefined;
+
     if (isAuthorized) {
-      fetchQueries();
+      setLoadingQueries(true);
+      setFormError("");
+
+      unsubscribe = subscribeToQueries({
+        callback(value) {
+          const snapshotValue =
+            value && typeof value === "object" && "val" in value
+              ? (value as DataSnapshot).val()
+              : value;
+
+          setQueries(
+            normalizeQueries(snapshotValue as Record<string, unknown> | null),
+          );
+          setLoadingQueries(false);
+        },
+        onError(error) {
+          setFormError(
+            error instanceof Error ? error.message : "Failed to load queries.",
+          );
+          setQueries([]);
+          setLoadingQueries(false);
+        },
+      });
     } else {
-      console.log("fuck");
+      setQueries([]);
+      setSelectedQuery(null);
     }
+
+    return () => {
+      if (unsubscribe) {
+        unsubscribe();
+      }
+    };
   }, [isAuthorized]);
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setFormError("");
-    setSubmitting(true);
-
-    try {
-      await login(email, password);
-      setEmail("");
-      setPassword("");
-    } catch (error) {
-      setFormError(
-        error instanceof Error
-          ? error.message
-          : "Login failed. Please try again.",
-      );
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    setSelectedQuery(null);
+    await logout();
   };
 
   if (!isAuthorized && isLoading) {
@@ -80,144 +129,162 @@ export default function AdminPanelPage() {
 
   return (
     <div className="min-h-screen bg-ide-bg text-ide-text">
-      {/* Navigation Header */}
-      <header className="border-b border-ide-border sticky top-0 z-40 bg-ide-bg/95 backdrop-blur">
-        <div className="max-w-7xl mx-auto px-4 py-4 flex items-center justify-between">
-          <button
-            onClick={() => navigate("/")}
-            className="flex items-center gap-2 text-ide-text-secondary hover:text-ide-text transition-colors"
-          >
-            <ArrowLeft size={20} />
-            <span>Back to Portfolio</span>
-          </button>
-          <h1 className="text-xl font-semibold flex items-center gap-2">
-            <ShieldCheck size={24} className="text-ide-primary" />
-            Admin Panel
-          </h1>
-          {isAuthorized && (
+      <header className="sticky top-0 z-20 border-b border-ide-border bg-ide-surface/90 backdrop-blur-md">
+        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-3 sm:px-6 lg:px-8">
+          <div className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-ide-primary/10 text-ide-primary">
+              <ShieldCheck className="h-5 w-5" />
+            </div>
+            <div>
+              <p className="text-[10px] font-medium uppercase tracking-[0.2em] text-ide-text-variant">
+                Admin
+              </p>
+              <h1 className="text-lg font-semibold text-ide-text">Portfolio</h1>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <span className="hidden rounded-full border border-ide-border bg-ide-surface-low px-3 py-1.5 text-sm text-ide-text-variant md:inline-flex">
+              {user?.email ?? "No email available"}
+            </span>
             <button
-              onClick={handleLogout}
-              className="flex items-center gap-2 px-4 py-2 bg-ide-error/20 text-ide-error hover:bg-ide-error/30 rounded transition-colors"
+              type="button"
+              onClick={() => navigate("/")}
+              className="inline-flex items-center gap-2 text-sm font-medium text-ide-text-variant hover:text-ide-primary transition-colors"
             >
-              <LogOut size={18} />
+              <Home size={16} />
+            </button>
+            <button
+              type="button"
+              onClick={handleLogout}
+              className="inline-flex items-center gap-2 rounded-xl border border-ide-border bg-ide-surface px-3 py-2 text-sm font-medium text-ide-text transition hover:border-red-200 hover:bg-red-50 hover:text-red-600"
+            >
+              <LogOut className="h-4 w-4" />
               Logout
             </button>
-          )}
+          </div>
         </div>
       </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 py-8">
-        {!isAuthorized ? (
-          // Login Form
-          <div className="max-w-md mx-auto">
-            <div className="bg-ide-elevated rounded-lg border border-ide-border p-8">
-              <div className="flex items-center justify-center gap-2 mb-8">
-                <Lock className="text-ide-primary" size={28} />
-                <h2 className="text-2xl font-bold">Admin Login</h2>
-              </div>
-
-              {formError && (
-                <div className="mb-4 p-3 bg-ide-error/20 border border-ide-error text-ide-error rounded">
-                  {formError}
-                </div>
-              )}
-
-              <form onSubmit={handleLogin} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Email
-                  </label>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-3 py-2 bg-ide-bg border border-ide-border rounded focus:outline-none focus:border-ide-primary transition-colors"
-                    placeholder="admin@example.com"
-                    disabled={submitting}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-2">
-                    Password
-                  </label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3 py-2 bg-ide-bg border border-ide-border rounded focus:outline-none focus:border-ide-primary transition-colors"
-                    placeholder="••••••••"
-                    disabled={submitting}
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={submitting || !email || !password}
-                  className="w-full py-2 bg-ide-primary text-ide-bg rounded font-medium hover:opacity-90 disabled:opacity-50 transition-opacity"
-                >
-                  {submitting ? "Logging in..." : "Login"}
-                </button>
-              </form>
-            </div>
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+        {loadingQueries && (
+          <div className="mb-4 flex items-center gap-2 rounded-xl border border-ide-border bg-ide-surface px-4 py-3 text-sm text-ide-text-variant">
+            <div className="h-4 w-4 animate-spin rounded-full border-2 border-ide-primary border-t-transparent" />
+            Loading queries...
           </div>
-        ) : (
-          // Queries Display
-          <div>
-            <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-2">Contact Queries</h2>
-              <p className="text-ide-text-secondary">
-                Manage and review all contact form submissions
-              </p>
-            </div>
+        )}
 
-            {formError && (
-              <div className="mb-6 p-4 bg-ide-error/20 border border-ide-error text-ide-error rounded">
-                {formError}
+        {formError && (
+          <div className="mb-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {formError}
+          </div>
+        )}
+
+        {selectedQuery ? (
+          <section className="space-y-5">
+            <button
+              type="button"
+              onClick={() => setSelectedQuery(null)}
+              className="inline-flex items-center gap-2 rounded-xl border border-ide-border bg-ide-surface px-4 py-2 text-sm font-medium text-ide-text transition hover:bg-ide-surface-low"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Queries
+            </button>
+
+            <div className="grid gap-6 lg:grid-cols-[320px,1fr]">
+              <aside className="rounded-2xl border border-ide-border bg-ide-surface p-5 shadow-sm">
+                <h2 className="text-lg font-semibold text-ide-text">
+                  User Details
+                </h2>
+
+                <dl className="mt-4 space-y-4 text-sm text-ide-text-variant">
+                  <div>
+                    <dt className="font-medium text-ide-text">Email</dt>
+                    <dd className="mt-1 break-all">
+                      {selectedQuery.email || "No email provided"}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt className="font-medium text-ide-text">User ID</dt>
+                    <dd className="mt-1 break-all">
+                      {selectedQuery.uid || selectedQuery.id || "Not available"}
+                    </dd>
+                  </div>
+
+                  <div>
+                    <dt className="font-medium text-ide-text">Submitted</dt>
+                    <dd className="mt-1">
+                      {formatTimestamp(selectedQuery.createdAt)}
+                    </dd>
+                  </div>
+                  {selectedQuery.title && (
+                    <div className="mt-4 whitespace-pre-wrap wrap-break-word rounded-xl border border-ide-border bg-ide-surface-low p-4 text-sm leading-7 text-ide-text">
+                      {selectedQuery.title}
+                    </div>
+                  )}
+                </dl>
+              </aside>
+
+              <div className="rounded-2xl border border-ide-border bg-ide-surface p-5 shadow-sm">
+                <h2 className="text-lg font-semibold text-ide-text">
+                  Full Message
+                </h2>
+                <div className="mt-4 whitespace-pre-wrap wrap-break-word rounded-xl border border-ide-border bg-ide-surface-low p-4 text-sm leading-7 text-ide-text">
+                  {selectedQuery.message || "No message provided."}
+                </div>
               </div>
-            )}
-
-            {loadingQueries ? (
-              <div className="text-center py-12">
-                <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-ide-primary"></div>
-                <p className="mt-4 text-ide-text-secondary">
-                  Loading queries...
+            </div>
+          </section>
+        ) : (
+          <section className="space-y-4">
+            {queries.length === 0 && !loadingQueries ? (
+              <div className="rounded-2xl border border-dashed border-ide-border bg-ide-surface px-6 py-12 text-center">
+                <p className="text-lg font-medium text-ide-text">
+                  No messages yet
+                </p>
+                <p className="mt-2 text-sm text-ide-text-variant">
+                  New submissions will appear here as soon as they are received.
                 </p>
               </div>
-            ) : queries.length === 0 ? (
-              <div className="text-center py-12 text-ide-text-secondary">
-                <p>No queries found</p>
-              </div>
             ) : (
-              <div className="grid gap-4">
-                {queries.map((query) => (
-                  <article
-                    key={query.id}
-                    className="border border-ide-border bg-ide-elevated rounded-lg p-6"
-                  >
-                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                      <p className="font-semibold text-lg text-ide-text">
-                        {query.name}
-                      </p>
-                      <p className="font-mono text-xs uppercase tracking-wider text-ide-text-secondary">
-                        {query.createdAt
-                          ? new Date(query.createdAt).toLocaleString()
-                          : "New"}
+              queries.map((query) => (
+                <button
+                  key={
+                    query.id ??
+                    `${query.email ?? "unknown"}-${query.createdAt ?? Math.random()}`
+                  }
+                  type="button"
+                  onClick={() => setSelectedQuery(query)}
+                  className="w-full rounded-2xl border border-ide-border bg-ide-surface p-5 text-left shadow-sm transition hover:border-ide-primary/40 hover:bg-ide-surface-low"
+                >
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:gap-3">
+                        <p className="truncate text-base font-semibold text-ide-text">
+                          {query.name || "Anonymous"}
+                        </p>
+                        <span className="truncate text-sm text-ide-text-variant">
+                          {query.email || "No email provided"}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-xs text-ide-text-variant">
+                        {formatTimestamp(query.createdAt)}
                       </p>
                     </div>
 
-                    <p className="mb-3 text-sm text-ide-text-secondary">
-                      {query.email}
-                    </p>
-                    <p className="text-sm leading-6 text-ide-text whitespace-pre-wrap">
-                      {query.message}
-                    </p>
-                  </article>
-                ))}
-              </div>
+                    <span className="inline-flex shrink-0 items-center rounded-lg bg-ide-primary/10 px-3 py-1.5 text-xs font-medium text-ide-primary">
+                      View Full Message
+                    </span>
+                  </div>
+
+                  <p className="mt-3 line-clamp-2 text-sm leading-6 text-ide-text-variant">
+                    {query.title || "No title provided."}
+                  </p>
+                </button>
+              ))
             )}
-          </div>
+          </section>
         )}
       </main>
     </div>

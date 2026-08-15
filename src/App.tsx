@@ -10,9 +10,9 @@ import { onAuthStateChanged } from "firebase/auth";
 import ProtectedRoute from "./components/ProtectedRoute";
 import PortfolioHome from "./pages/PortfolioHome";
 import AdminLogin from "./admin/pages/AdminLogin";
-import AdminDashboard from "./admin/pages/AdminDashboard";
 import useAuthStore from "./store/authStore";
 import { auth } from "./utils/Firebase_RTDB";
+import AdminPanelPage from "./pages/AdminPanel";
 
 export default function App() {
   const setUser = useAuthStore((state) => state.setUser);
@@ -47,7 +47,7 @@ export default function App() {
         path="/admin"
         element={
           <ProtectedRoute>
-            <AdminDashboard />
+            <AdminPanelPage />
           </ProtectedRoute>
         }
       />

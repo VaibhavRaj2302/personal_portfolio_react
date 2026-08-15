@@ -4,6 +4,23 @@
  */
 
 import { Terminal, PanelRightOpen } from "lucide-react";
+import useAuthStore from "../store/useAuthStore";
+import { Navigate, useNavigate } from "react-router-dom";
+
+export type NavItemType =
+  | "summary"
+  | "projects"
+  | "experience"
+  | "achievements"
+  | "skills"
+  | "education"
+  | "contact"
+  | "admin";
+
+export interface NavItems {
+  id: NavItemType;
+  label: string;
+}
 
 interface HeaderProps {
   onScrollTo: (id: string) => void;
@@ -16,7 +33,11 @@ export default function Header({
   showDrawerOption,
   openDrawer,
 }: HeaderProps) {
-  const navItems = [
+  const { isAuthenticated } = useAuthStore();
+
+  const navigator = useNavigate();
+
+  const navItems: NavItems[] = [
     { id: "summary", label: "SUMMARY" },
     { id: "projects", label: "PROJECTS" },
     { id: "experience", label: "EXPERIENCE" },
@@ -24,6 +45,7 @@ export default function Header({
     { id: "skills", label: "SKILLS" },
     { id: "education", label: "EDUCATION" },
     { id: "contact", label: "CONTACT" },
+    ...(isAuthenticated ? [{ id: "admin" as const, label: "Admin" }] : []),
   ];
 
   return (
@@ -59,7 +81,17 @@ export default function Header({
             {navItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => onScrollTo(item.id)}
+                onClick={() => {
+                  switch (item.id) {
+                    case "admin":
+                      navigator("/admin");
+                      break;
+
+                    default:
+                      onScrollTo(item.id);
+                      break;
+                  }
+                }}
                 className="hover:text-ide-primary transition-colors uppercase tracking-wider"
                 id={`nav-${item.id}`}
               >

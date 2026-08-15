@@ -5,26 +5,34 @@
 
 import { CircleX } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { NavItems } from "./Header";
+import useAuthStore from "../store/useAuthStore";
+import { useNavigate } from "react-router-dom";
 
 interface NavigationDrawersProps {
   isOpen: boolean;
   handleClose: () => void;
 }
 
-const buttonsList = [
-  { buttonName: "SUMMARY", buttonId: "summary" },
-  { buttonName: "PROJECTS", buttonId: "projects" },
-  { buttonName: "EXPERIENCE", buttonId: "experience" },
-  { buttonName: "ACHIEVEMENTS", buttonId: "achievements" },
-  { buttonName: "SKILLS", buttonId: "skills" },
-  { buttonName: "EDUCATION", buttonId: "education" },
-  { buttonName: "CONTACT", buttonId: "contact" },
-];
-
 export default function NavigationDrawers({
   isOpen,
   handleClose,
 }: NavigationDrawersProps) {
+  const { isAuthenticated } = useAuthStore();
+
+  const navigate = useNavigate();
+
+  const buttonsList: NavItems[] = [
+    { label: "SUMMARY", id: "summary" },
+    { label: "PROJECTS", id: "projects" },
+    { label: "EXPERIENCE", id: "experience" },
+    { label: "ACHIEVEMENTS", id: "achievements" },
+    { label: "SKILLS", id: "skills" },
+    { label: "EDUCATION", id: "education" },
+    { label: "CONTACT", id: "contact" },
+    ...(isAuthenticated ? [{ label: "Admin", id: "admin" as const }] : []),
+  ];
+
   const handleScrollTo = (id: string) => {
     const target = document.getElementById(id);
     if (target) {
@@ -65,14 +73,23 @@ export default function NavigationDrawers({
             </div>
             {buttonsList.map((item) => (
               <button
-                key={item.buttonId}
+                key={item.id}
                 onClick={() => {
-                  handleScrollTo(item.buttonId);
+                  switch (item.id) {
+                    case "admin":
+                      navigate("/admin");
+                      break;
+
+                    default:
+                      handleScrollTo(item.id);
+                      break;
+                  }
+
                   handleClose();
                 }}
                 className="hover:text-ide-primary transition-colors uppercase tracking-wider p-2 text-left"
               >
-                {item.buttonName}
+                {item.label}
               </button>
             ))}
           </motion.div>

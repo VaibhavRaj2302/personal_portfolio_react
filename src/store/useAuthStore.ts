@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import type { User } from "firebase/auth";
-import { loginWithEmailPassword, logoutUser } from "../services/authService";
+import { loginWithEmailPassword, logoutUser } from "../services/AuthService";
 
 export type AuthUser = {
   uid: string;

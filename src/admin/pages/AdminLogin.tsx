@@ -2,7 +2,7 @@ import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Chrome, Lock, Mail } from "lucide-react";
 import useAuthStore from "../../store/authStore";
-import { loginWithGoogle } from "../../services/authService";
+import { loginWithGoogle } from "../../services/AuthService";
 
 export default function AdminLogin() {
   const navigate = useNavigate();
