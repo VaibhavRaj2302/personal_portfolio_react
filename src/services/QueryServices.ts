@@ -15,7 +15,7 @@ export const saveUserQuery = async ({
 }): Promise<{ message: string }> => {
   const queriesRef = ref(database, "queries");
   try {
-    push(queriesRef, {
+    await push(queriesRef, {
       ...queryData,
       createdAt: serverTimestamp(),
     });
@@ -23,8 +23,20 @@ export const saveUserQuery = async ({
       message:
         "I will reach out to you soon! Your query has been registered with me.",
     };
-  } catch (error) {
-    throw { message: `${error}`, from: "Saving Query" };
+  } catch (error: unknown) {
+    const message =
+      typeof error === "object" && error !== null && "message" in error
+        ? String((error as { message?: unknown }).message)
+        : "Unknown error occurred while saving query.";
+
+    const code =
+      typeof error === "object" && error !== null && "code" in error
+        ? String((error as { code?: unknown }).code)
+        : undefined;
+
+    throw {
+      message,
+    };
   }
 };
 

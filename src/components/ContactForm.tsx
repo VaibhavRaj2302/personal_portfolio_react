@@ -1,8 +1,12 @@
 import { useState, ChangeEvent, FormEvent } from "react";
 import { saveUserQuery } from "../services/QueryServices";
 import GenericModal, { ModalAction } from "./GenericModel";
-import { send } from "@emailjs/browser";
+import { EmailJSResponseStatus, send } from "@emailjs/browser";
 import DOMPurify from "dompurify";
+
+interface ErrorResponse {
+  message: string;
+}
 
 interface ContactFormInterface {
   name: string;
@@ -103,22 +107,40 @@ function ContactForm() {
     sanitizedForm: ContactFormInterface,
   ) {
     // 2. Send Auto-Reply Email
-    await send(
-      import.meta.env.VITE_SERVICE_ID_EMAIL_JS,
-      import.meta.env.VITE_TEMPLATE_ID_EMAIL_JS,
-      {
-        name: sanitizedForm.name,
-        title: sanitizedForm.title,
-        email: sanitizedForm.email,
-        from: "Vaibhav raj singh",
-      },
-      import.meta.env.VITE_PUBLIC_KEY_EMAIL_JS,
-    );
+    try {
+      await send(
+        import.meta.env.VITE_SERVICE_ID_EMAIL_JS,
+        import.meta.env.VITE_TEMPLATE_ID_EMAIL_JS,
+        {
+          name: sanitizedForm.name,
+          title: sanitizedForm.title,
+          email: sanitizedForm.email,
+          from: "Vaibhav raj singh",
+        },
+        import.meta.env.VITE_PUBLIC_KEY_EMAIL_JS,
+      );
+    } catch (error) {
+      if (error instanceof EmailJSResponseStatus) throw { message: error.text };
+      else
+        throw {
+          message:
+            "Oops! Something went wront please train again after some time.",
+        };
+    }
   }
 
   // Helper to strip HTML tags and sanitize strings
   const sanitizeInput = (str: string): string => {
     return DOMPurify.sanitize(str.trim(), { ALLOWED_TAGS: [] }); // ALLOWED_TAGS: [] strips ALL HTML
+  };
+
+  const isErrorResponse = (error: unknown): error is ErrorResponse => {
+    return (
+      typeof error === "object" &&
+      error !== null &&
+      "message" in error &&
+      typeof (error as { message?: unknown }).message === "string"
+    );
   };
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
@@ -164,33 +186,33 @@ function ContactForm() {
         ],
       });
     } catch (error) {
-      console.log(error);
-
-      setIsModalOpen({
-        show: true,
-        content: `${error}`,
-        title: "Something went wrong!",
-        modelAction: [
-          {
-            label: "Retry",
-            type: "secondary",
-            onClick: async () => {
-              await storeUserQueriesAndSendConfirmationEmail();
+      if (isErrorResponse(error)) {
+        setIsModalOpen({
+          show: true,
+          content: `${error.message}`,
+          title: "Something went wrong!",
+          modelAction: [
+            {
+              label: "Retry",
+              type: "secondary",
+              onClick: async () => {
+                await storeUserQueriesAndSendConfirmationEmail();
+              },
             },
-          },
-          {
-            label: "Ok",
-            type: "danger",
-            onClick: () => {
-              setIsModalOpen({
-                show: false,
-                modelAction: undefined,
-                content: null,
-              });
+            {
+              label: "Ok",
+              type: "danger",
+              onClick: () => {
+                setIsModalOpen({
+                  show: false,
+                  modelAction: undefined,
+                  content: null,
+                });
+              },
             },
-          },
-        ],
-      });
+          ],
+        });
+      }
     } finally {
       setSubmitting(false);
     }
