@@ -10,6 +10,10 @@ interface CertInterface {
 
 const certifications: CertInterface[] = [
   {
+    title: "Claude Code 101",
+    href: "https://academy.claude.com/verify/656ffbbbbe897a3396bfafe94b44dd86",
+  },
+  {
     title: "Claude Code in Action",
     href: "https://verify.skilljar.com/c/aq37xxnotht9",
   },

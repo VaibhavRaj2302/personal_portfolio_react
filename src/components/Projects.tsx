@@ -140,7 +140,10 @@ export default function Projects() {
             {item.metrics && item.metrics.length > 0 && (
               <ul className="space-y-2 mb-5">
                 {item.metrics.map((metric) => (
-                  <li key={metric} className="font-sans text-sm text-ide-text">
+                  <li
+                    key={String(metric)}
+                    className="font-sans text-sm text-ide-text"
+                  >
                     • {metric}
                   </li>
                 ))}

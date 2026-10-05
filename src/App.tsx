@@ -3,72 +3,54 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useState, useEffect } from "react";
-import Header from "./components/Header";
-import NavigationDrawers from "./components/NavigationDrawers";
-import Hero from "./components/Hero";
-import Summary from "./components/Summary";
-import Projects from "./components/Projects";
-import ExperienceTimeline from "./components/Experience";
-import Skills from "./components/Skills";
-import Achievements from "./components/Achievements";
+import { useEffect } from "react";
+import { Route, Routes } from "react-router-dom";
+import { onAuthStateChanged } from "firebase/auth";
 
-import Contact from "./components/Contact";
-import Footer from "./components/Footer";
-import useDeviceType from "./utils/hooks/deviceUtility";
-import Education from "./components/Education";
-import ContactForm from "./components/ContactForm";
+import ProtectedRoute from "./components/ProtectedRoute";
+import PortfolioHome from "./pages/PortfolioHome";
+import AdminLogin from "./admin/pages/AdminLogin";
+import useAuthStore from "./store/authStore";
+import { auth } from "./utils/Firebase_RTDB";
+import AdminPanelPage from "./pages/AdminPanel";
 
 export default function App() {
-  const [sideBarOpen, setSideBarOpen] = useState<boolean>(false);
-
-  const handleScrollTo = (id: string) => {
-    const target = document.getElementById(id);
-    if (target) {
-      target.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
-  };
-
-  const { isMobile } = useDeviceType();
+  const setUser = useAuthStore((state) => state.setUser);
+  const setLoading = useAuthStore((state) => state.setLoading);
+  const clearUser = useAuthStore((state) => state.clearUser);
 
   useEffect(() => {
-    if (!isMobile) {
-      setSideBarOpen(false);
-    }
-  }, [isMobile]);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+      setLoading(false);
+
+      if (currentUser) {
+        setUser({
+          uid: currentUser.uid,
+          email: currentUser.email,
+          displayName: currentUser.displayName,
+          photoURL: currentUser.photoURL,
+        });
+        return;
+      }
+
+      clearUser();
+    });
+
+    return () => unsubscribe();
+  }, [clearUser, setLoading, setUser]);
 
   return (
-    <div className="bg-ide-bg text-ide-text font-sans antialiased min-h-screen flex flex-col transition-colors duration-300">
-      <Header
-        onScrollTo={handleScrollTo}
-        showDrawerOption={isMobile}
-        openDrawer={(open) => setSideBarOpen(open)}
+    <Routes>
+      <Route path="/" element={<PortfolioHome />} />
+      <Route path="/admin/login" element={<AdminLogin />} />
+      <Route
+        path="/admin"
+        element={
+          <ProtectedRoute>
+            <AdminPanelPage />
+          </ProtectedRoute>
+        }
       />
-
-      <main className="mt-16 max-w-7xl w-full mx-auto ide-border-l ide-border-r ide-border-b  flex flex-row grow min-h-[calc(100vh-64px)] transition-colors duration-300 relative">
-        {sideBarOpen && (
-          <NavigationDrawers
-            handleClose={() => setSideBarOpen(false)}
-            isOpen={sideBarOpen}
-          />
-        )}
-
-        <div className="grow flex flex-col overflow-x-hidden">
-          <div className="grow flex flex-col">
-            <Hero onScrollTo={handleScrollTo} />
-            <Summary />
-            <Projects />
-            <ExperienceTimeline />
-            <Achievements />
-            <Skills />
-            <Education />
-            <Contact />
-            <ContactForm />
-          </div>
-        </div>
-      </main>
-
-      <Footer />
-    </div>
+    </Routes>
   );
 }
