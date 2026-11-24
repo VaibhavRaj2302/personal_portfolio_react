@@ -14,11 +14,12 @@ const skillGroups = [
       "JavaScript",
       "ReactJS",
       "Node.js",
+      "React Native",
     ],
   },
   {
     title: "State Management",
-    items: ["BLoC", "flutter_bloc", "Provider", "Redux"],
+    items: ["BLoC", "flutter_bloc", "Provider", "Redux", "Zustand"],
   },
   {
     title: "Networking",
@@ -27,11 +28,12 @@ const skillGroups = [
       "Dio",
       "Alamofire",
       "Futures & async/await",
+      "Axios",
     ],
   },
   {
     title: "Package Management",
-    items: ["CocoaPods", "Swift Package Manager", "pub.dev", "npm"],
+    items: ["CocoaPods", "Swift Package Manager", "pub.dev", "npm", "yarn"],
   },
   {
     title: "Firebase",
@@ -72,6 +74,7 @@ const skillGroups = [
       "Clean Architecture",
       "Agile",
       "Scrum",
+      "Feature-Driven Architecture",
     ],
   },
 ];

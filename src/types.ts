@@ -6,6 +6,7 @@
 export interface Project {
   id: string;
   title: string;
+  ownership: string;
   role: string;
   description: string;
   details?: string[];

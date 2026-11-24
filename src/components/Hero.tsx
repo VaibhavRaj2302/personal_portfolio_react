@@ -12,14 +12,14 @@ interface HeroProps {
 
 const metricsList: Metric[] = [
   { value: "3+", label: "Years Experience" },
-  { value: "Flutter + iOS", label: "Primary Focus" },
+  { value: "Mobile Applications", label: "Primary Focus" },
   { value: "15–20", label: "PRs per month" },
 ];
 
 export default function Hero({ onScrollTo }: HeroProps) {
   return (
     <section
-      className="flex-grow p-6 md:p-12 transition-colors duration-300"
+      className="grow p-6 md:p-12 transition-colors duration-300"
       id="introduction"
     >
       <div className="max-w-4xl">
@@ -48,7 +48,7 @@ export default function Hero({ onScrollTo }: HeroProps) {
           transition={{ duration: 0.6, delay: 0.2, ease: "easeOut" }}
           className="font-sans text-xl md:text-2xl text-ide-text mb-4 font-semibold"
         >
-          Mobile Application Developer (Flutter & iOS)
+          Mobile Application Developer (Flutter | iOS | React JS | React Native)
         </motion.p>
 
         <motion.p
