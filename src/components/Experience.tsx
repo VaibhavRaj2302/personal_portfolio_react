@@ -11,7 +11,7 @@ const experienceData: Experience[] = [
   {
     id: "sysquare",
     period: "March 2023 – Present",
-    role: "Associate Software Developer (Flutter & iOS)",
+    role: "Associate Software Developer (Flutter | iOS | React JS | React Native)",
     company: "Sysquare Technologies Pvt. Ltd.",
     description: "Jaipur, India",
     bullets: [
